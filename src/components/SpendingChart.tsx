@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 
 const SpendingChart: React.FC = () => {
     const [userId, setUserId] = useState<number | string>('');
+    const [showChart, setShowChart] = useState<boolean>(false); // State to control chart display
     const dispatch = useDispatch();
 
     // Select spendings and loading state from Redux store
@@ -15,6 +16,7 @@ const SpendingChart: React.FC = () => {
 
     const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserId(e.target.value);
+        setShowChart(false); // Reset chart visibility when userId changes
     };
 
     const handleFetchData = () => {
@@ -29,7 +31,9 @@ const SpendingChart: React.FC = () => {
         // Dispatch the action to fetch spendings for the specific user ID
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        dispatch(fetchSpendings({ filters: { userid: Number(userId) }, page: 1 }));
+        dispatch(fetchSpendings({ filters: { userid: Number(userId) }, page: 1 })).then(() => {
+            setShowChart(true); // Show chart only after data has been fetched
+        });
     };
 
     const getChartDataByType = () => {
@@ -95,10 +99,11 @@ const SpendingChart: React.FC = () => {
                     Fetch Data
                 </button>
             </div>
-            {types.length > 0 && userId ? (
+
+            {showChart && types.length > 0 ? (
                 <ReactECharts option={options} />
             ) : (
-                userId && <p>No data available for this User ID.</p>
+                userId && showChart && <p>No data available for this User ID.</p>
             )}
         </div>
     );
